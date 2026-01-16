@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
+import AuthContext from '../context/AuthContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 
