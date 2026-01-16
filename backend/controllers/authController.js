@@ -114,6 +114,8 @@ const registerInstitution = async (req, res) => {
             success: true,
             token,
             role: user.role,
+            name: user.name,
+            email: user.email,
             institutionCode: institution.code,
             redirect: `/${institution.code}/admin`
         });
@@ -197,6 +199,8 @@ const globalLogin = async (req, res) => {
             success: true,
             token: accessToken,
             role: user.role,
+            name: user.name,
+            email: user.email,
             institutionCode: institution.code,
             redirect: redirectPath
         });
@@ -325,6 +329,8 @@ const registerUser = async (req, res) => {
                 success: true,
                 token,
                 role: user.role,
+                name: user.name,
+                email: user.email,
                 institutionCode: req.institution.code,
                 redirect: `/${req.institution.code}/dashboard`
             });
