@@ -115,46 +115,44 @@ const Institution = () => {
             </div>
 
             {/* Users List */}
-            <Card className="overflow-hidden p-0">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+            <div className="admin-table-container">
+                <table className="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading ? (
                             <tr>
-                                <th className="p-4 font-semibold text-gray-600">User</th>
-                                <th className="p-4 font-semibold text-gray-600">Role</th>
-                                <th className="p-4 font-semibold text-gray-600">Joined</th>
-                                <th className="p-4 font-semibold text-gray-600">Email</th>
+                                <td colSpan="4" className="text-center text-gray-500">Loading...</td>
                             </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan="4" className="p-8 text-center text-gray-500">Loading...</td>
+                        ) : users.length === 0 ? (
+                            <tr>
+                                <td colSpan="4" className="text-center text-gray-500">No users found matching filters.</td>
+                            </tr>
+                        ) : (
+                            users.map(u => (
+                                <tr key={u._id}>
+                                    <td>{u.name}</td>
+                                    <td>
+                                        <span className={`badge ${u.role === 'ADMIN' ? 'badge-primary' : 'badge-secondary'}`}>
+                                            {u.role === 'MEMBER' ? 'Student' : u.role === 'ADMIN' ? 'Admin' : u.role}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {new Date(u.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td>{u.email}</td>
                                 </tr>
-                            ) : users.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" className="p-8 text-center text-gray-500">No users found matching filters.</td>
-                                </tr>
-                            ) : (
-                                users.map(u => (
-                                    <tr key={u._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="p-4 font-medium text-gray-900">{u.name}</td>
-                                        <td className="p-4">
-                                            <span className={`badge ${u.role === 'ADMIN' ? 'badge-primary' : 'badge-secondary'}`}>
-                                                {u.role === 'MEMBER' ? 'Student' : u.role === 'ADMIN' ? 'Admin' : u.role}
-                                            </span>
-                                        </td>
-                                        <td className="p-4 text-gray-500 text-sm">
-                                            {new Date(u.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="p-4 text-gray-500">{u.email}</td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </Card>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };

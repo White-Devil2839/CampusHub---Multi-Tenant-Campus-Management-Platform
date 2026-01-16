@@ -6,6 +6,7 @@ import '../styles/auth.css';
 const ResetPassword = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
+    const id = searchParams.get('id');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
@@ -14,7 +15,7 @@ const ResetPassword = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const { data } = await api.post('/auth/reset-password', { token, password });
+            const { data } = await api.post('/auth/reset-password', { token, id, password });
             setMessage(data.message);
             setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
