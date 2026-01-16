@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import Card from '../components/Card';
+import Button from '../components/Button';
+import AuthContext from '../context/AuthContext';
 
 import '../styles/dashboard.css';
 
@@ -31,7 +33,7 @@ const Profile = () => {
         <h1 className="dashboard-title">My Profile</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <div className="section-container">
           <h2 className="section-title mb-4">My Club Memberships</h2>
           {memberships.length === 0 ? (
@@ -69,14 +71,18 @@ const Profile = () => {
         </div>
       </div>
       
-      {/* Change Password Section */}
-      <ChangePassword />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Change Password Section */}
+          <ChangePassword />
+
+          {/* Delete Account Section */}
+          <DeleteAccount />
+      </div>
     </div>
   );
 };
 
 const ChangePassword = () => {
-  const { institutionCode } = useParams();
   const [passData, setPassData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -95,16 +101,6 @@ const ChangePassword = () => {
     }
 
     try {
-      // NOTE: The backend route is global /api/auth/password 
-      // but our axios instance might be base url + /:code
-      // The route we added is router.put('/auth/password'...) in global scope?
-      // No, authRoutes is mounted at /api/ (global) AND implied /api/:code?
-      // In server.js: app.use('/api', authRoutes);
-      // It is NOT mounted under /api/:institutionCode by default unless institutionMiddleware logic allows.
-      // institutionMiddleware is applied to /api/:institutionCode
-      // But authRoutes isn't mounted there.
-      // However, we can call the global route.
-      // Let's force the global route path.
       await api.put('/auth/password', {
         currentPassword: passData.currentPassword,
         newPassword: passData.newPassword
@@ -117,10 +113,10 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="section-container max-w-md">
+    <div className="section-container">
       <h2 className="section-title mb-4">Change Password</h2>
       {message && <div className="bg-green-100 text-green-700 p-3 rounded mb-4 text-sm font-medium">{message}</div>}
-      {error && <div className="status-badge bg-red-100 text-red-700 mb-4 block w-full text-center normal-case">{error}</div>}
+      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm font-medium">{error}</div>}
       
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
@@ -139,7 +135,7 @@ const ChangePassword = () => {
            <input
              type="password"
              name="newPassword"
-             className="input"
+             className="input border-gray-300"
              value={passData.newPassword}
              onChange={handleChange}
              required
@@ -158,10 +154,82 @@ const ChangePassword = () => {
              minLength={6}
            />
         </div>
-        <button type="submit" className="btn-full-width">Update Password</button>
+        <Button type="submit" variant="primary">Update Password</Button>
       </form>
     </div>
   );
+};
+
+const DeleteAccount = () => {
+    const { institutionCode } = useParams();
+    const { logout } = useContext(AuthContext);
+    const [confirming, setConfirming] = useState(false);
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleDelete = async (e) => {
+        e.preventDefault();
+        try {
+            await api.delete(`/${institutionCode}/users/me`, {
+                data: { password }
+            });
+            logout();
+            navigate(`/${institutionCode}/login`);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to delete account');
+        }
+    };
+
+    return (
+        <div className="section-container border-red-200 bg-red-50">
+            <h2 className="section-title text-red-700 mb-4">Danger Zone</h2>
+            
+            {!confirming ? (
+                <div>
+                    <p className="text-gray-600 mb-4">
+                        Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                    <Button variant="danger" onClick={() => setConfirming(true)}>
+                        Delete Account
+                    </Button>
+                </div>
+            ) : (
+                <form onSubmit={handleDelete} className="flex flex-col gap-4">
+                    <p className="text-red-800 font-medium">
+                        Please enter your password to confirm deletion.
+                    </p>
+                    {error && <div className="bg-red-100 text-red-700 p-2 rounded text-sm">{error}</div>}
+                    <div>
+                        <label className="label text-red-900">Password</label>
+                        <input
+                            type="password"
+                            className="input border-red-300 focus:border-red-500 focus:ring-red-200"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="flex gap-4">
+                        <Button type="submit" variant="danger">
+                            Confirm Delete
+                        </Button>
+                        <Button 
+                            type="button" 
+                            variant="secondary" 
+                            onClick={() => {
+                                setConfirming(false);
+                                setPassword('');
+                                setError('');
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+            )}
+        </div>
+    );
 };
 
 export default Profile;
