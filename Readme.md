@@ -15,8 +15,8 @@ I built CampusHub to bring order to this chaos. It handles the complex workflows
 *   **For Club Leads**: Tools to manage rosters, schedule events without time conflicts, and engage members.
 *   **For Students**: A single place to discover communities and join them.
 
-## ⚡ Technical Highlights (For Recruiters)
-This isn't just a simple website; it's a **Multi-Tenant SaaS Application**.
+## ⚡ Technical Highlights 
+It's a **Multi-Tenant SaaS Application**.
 *   **Architecture**: I implemented a **Multi-Tenant** architecture (similar to how Slack or Discord works). One codebase serves multiple universities, but each university's data is strictly isolated using Middleware Guards.
 *   **Security**: Bank-grade security practices including **Role-Based Access Control (RBAC)** (ensuring students can't access admin features) and secure **JWT Authentication**.
 *   **Design**: Built with a focus on **User Experience**. I moved away from boring dashboards and designed a modern "Glassmorphism" UI that feels premium and responsive.
@@ -26,7 +26,7 @@ This isn't just a simple website; it's a **Multi-Tenant SaaS Application**.
 *   **Frontend**: React.js, Tailwind CSS (Custom Design System), React Router
 *   **Backend**: Node.js, Express.js (RESTful API)
 *   **Database**: MongoDB (Mongoose), tailored for flexible schema design
-*   **DevOps/Tools**: Git, Postman, SendGrid API
+*   **DevOps/Tools**: Git, SendGrid API
 
 ## 💻 How to Run This Project
 If you want to spin this up locally to test features:
