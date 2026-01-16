@@ -1,6 +1,16 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5008/api';
+let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5008/api';
+
+// Safety: Remove accidental "VITE_API_URL=" prefix if pasted into dashboard
+if (API_URL.startsWith('VITE_API_URL=')) {
+    API_URL = API_URL.replace('VITE_API_URL=', '');
+}
+
+// Safety: Fix protocol typo (https:/ to https://) if necessary
+if (API_URL.startsWith('https:/') && !API_URL.startsWith('https://')) {
+    API_URL = API_URL.replace('https:/', 'https://');
+}
 
 const api = axios.create({
     baseURL: API_URL.endsWith('/') ? API_URL : `${API_URL}/`,
