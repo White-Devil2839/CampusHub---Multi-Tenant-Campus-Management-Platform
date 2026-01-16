@@ -89,7 +89,7 @@ const updateRequestStatus = async (req, res) => {
 `;
 
                 await sendEmail({
-                    email: membership.userId.email,
+                    to: membership.userId.email,
                     subject: 'Your Membership Was Approved - CampusHub',
                     html: message
                 });

@@ -52,7 +52,7 @@ const registerInstitution = async (req, res) => {
 
         try {
             await sendEmail({
-                email: adminEmail,
+                to: adminEmail,
                 subject: 'Institution Registration Successful',
                 html: message,
             });
@@ -317,7 +317,7 @@ const requestReset = async (req, res) => {
 
         try {
             await sendEmail({
-                email: user.email,
+                to: user.email,
                 subject: 'Reset Your Password - CampusHub',
                 html: message
             });
@@ -418,7 +418,7 @@ const resetPassword = async (req, res) => {
         `;
 
         await sendEmail({
-            email: user.email,
+            to: user.email,
             subject: 'Your Password Was Changed - CampusHub',
             html: message
         });
@@ -446,7 +446,7 @@ const changePassword = async (req, res) => {
         // Manual Password Change Email
         try {
             await sendEmail({
-                email: user.email,
+                to: user.email,
                 subject: 'Your Password Was Updated - CampusHub',
                 html: `<p>Your password was updated via account settings. If this wasn't you, contact support.</p>`
             });
@@ -467,7 +467,7 @@ const changePassword = async (req, res) => {
 const testEmail = async (req, res) => {
     try {
         const sent = await sendEmail({
-            email: process.env.EMAIL_FROM || req.query.email, // Send to self or query param
+            to: process.env.EMAIL_FROM || req.query.email, // Send to self or query param
             subject: 'Test Email from CampusHub',
             message: 'This is a test email to verify SendGrid integration.',
         });
