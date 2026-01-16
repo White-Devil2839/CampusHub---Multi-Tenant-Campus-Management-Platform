@@ -76,11 +76,22 @@ const AdminDashboard = () => {
     }
   };
 
+  const { user } = useContext(AuthContext);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning';
+    if (hour < 18) return 'Good Afternoon';
+    return 'Good Evening';
+  };
+
   return (
     <div className="dashboard-container">
       <div className="section-container">
-        <h1 className="dashboard-title">Admin Dashboard</h1>
-        <p className="dashboard-subtitle">Manage clubs, events, and membership requests</p>
+        <div>
+           <h1 className="dashboard-title">{getGreeting()}, {user?.name}!</h1>
+           <p className="dashboard-subtitle">Admin Dashboard - Manage clubs, events, and requests</p>
+        </div>
       </div>
 
       {message.text && (

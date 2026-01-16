@@ -62,18 +62,21 @@ const updateRequestStatus = async (req, res) => {
     const { status, role } = req.body; // APPROVED or REJECTED, optional role override
 
     try {
-        const membership = await ClubMembership.findById(req.params.id)
+        // Securely find membership belonging to this institution
+        const membership = await ClubMembership.findOne({
+            _id: req.params.id,
+            institutionId: req.institutionId
+        })
             .populate('userId')
             .populate('clubId')
             .populate('institutionId');
 
         if (!membership) {
-            return res.status(404).json({ message: 'Membership request not found' });
+            return res.status(404).json({ message: 'Membership request not found or not authorized' });
         }
 
-        if (membership.institutionId._id.toString() !== req.institutionId.toString()) {
-            return res.status(403).json({ message: 'Not authorized' });
-        }
+        // Removed manual check as query handles it
+        // if (membership.institutionId._id.toString() !== req.institutionId.toString()) ...
 
         membership.status = status;
 
