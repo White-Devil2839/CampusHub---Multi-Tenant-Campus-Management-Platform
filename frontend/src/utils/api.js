@@ -3,16 +3,21 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5008/api';
 
 const api = axios.create({
-    baseURL: API_URL,
+    baseURL: API_URL.endsWith('/') ? API_URL : `${API_URL}/`,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Request interceptor - inject token
+// Request interceptor - inject token and fix path merging
 api.interceptors.request.use(
     (config) => {
+        // Ensure paths are relative to baseURL to avoid stripping /api subpath
+        if (config.url && config.url.startsWith('/')) {
+            config.url = config.url.substring(1);
+        }
+
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
