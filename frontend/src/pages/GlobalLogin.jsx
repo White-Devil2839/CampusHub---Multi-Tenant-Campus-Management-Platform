@@ -27,7 +27,7 @@ const GlobalLogin = () => {
                 if (data.redirect) {
                     navigate(data.redirect);
                 } else {
-                    if (data.role === 'ADMIN' || data.role === 'SUPER_ADMIN') {
+                    if (data.role === 'ADMIN') {
                         navigate(`/${data.institutionCode}/admin`);
                     } else {
                         navigate(`/${data.institutionCode}/dashboard`);

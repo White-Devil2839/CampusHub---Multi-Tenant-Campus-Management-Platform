@@ -15,7 +15,7 @@ const ProtectedRoute = () => {
     }
 
     // Optional: Check if user belongs to this institution (for multi-tenant safety)
-    if (institutionCode && user.institutionCode && user.institutionCode !== institutionCode && user.role !== 'SUPER_ADMIN') {
+    if (institutionCode && user.institutionCode && user.institutionCode !== institutionCode) {
          // Redirect to their own dashboard or show unauthorized
          // For now, let's redirect them to their own dashboard
          return <Navigate to={`/${user.institutionCode}/dashboard`} replace />;

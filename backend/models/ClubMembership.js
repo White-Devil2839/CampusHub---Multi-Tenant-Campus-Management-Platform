@@ -16,6 +16,16 @@ const clubMembershipSchema = new mongoose.Schema({
         enum: ['PENDING', 'APPROVED', 'REJECTED'],
         default: 'PENDING',
     },
+    role: {
+        type: String,
+        enum: ['MEMBER', 'CLUB_LEAD'],
+        default: 'MEMBER',
+    },
+    requestedRole: {
+        type: String,
+        enum: ['MEMBER', 'CLUB_LEAD'],
+        default: 'MEMBER',
+    },
     institutionId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Institution',

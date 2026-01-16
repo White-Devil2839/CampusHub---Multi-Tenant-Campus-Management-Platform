@@ -42,6 +42,7 @@ const getClubById = async (req, res) => {
 const joinClub = async (req, res) => {
     try {
         const club = await Club.findById(req.params.clubId);
+        const { requestedRole = 'MEMBER' } = req.body; // Can request MEMBER or CLUB_LEAD
 
         if (!club) {
             return res.status(404).json({ message: 'Club not found' });
@@ -60,14 +61,29 @@ const joinClub = async (req, res) => {
             return res.status(400).json({ message: 'Already a member or request pending' });
         }
 
+        // Admins are auto-approved with full access
+        const isAdmin = req.user.role === 'ADMIN';
+
         const membership = await ClubMembership.create({
             userId: req.user._id,
             clubId: req.params.clubId,
             institutionId: req.institutionId,
-            status: 'PENDING',
+            status: isAdmin ? 'APPROVED' : 'PENDING',
+            role: isAdmin ? 'CLUB_LEAD' : 'MEMBER', // Admins get Club Lead by default
+            requestedRole: isAdmin ? 'CLUB_LEAD' : requestedRole,
         });
 
-        res.status(201).json(membership);
+        if (isAdmin) {
+            res.status(201).json({
+                ...membership.toObject(),
+                message: 'You have been automatically added to this club as Admin'
+            });
+        } else {
+            res.status(201).json({
+                ...membership.toObject(),
+                message: 'Join request sent! Waiting for admin approval.'
+            });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
@@ -105,9 +121,17 @@ const getClubMembers = async (req, res) => {
         const members = await ClubMembership.find({
             clubId: req.params.clubId,
             status: 'APPROVED'
-        }).populate('userId', 'name email');
+        }).populate('userId', 'name email role');
 
-        res.json(members);
+        // Include club role in response
+        const membersWithRoles = members.map(m => ({
+            _id: m._id,
+            userId: m.userId,
+            role: m.role, // MEMBER or CLUB_LEAD
+            joinedAt: m.createdAt
+        }));
+
+        res.json(membersWithRoles);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });

@@ -13,7 +13,7 @@ const {
 } = require('../controllers/adminController');
 
 router.use(protect);
-router.use(authorize('ADMIN', 'SUPER_ADMIN'));
+router.use(authorize('ADMIN'));
 
 router.post('/clubs', createClub);
 router.get('/requests', getPendingRequests);

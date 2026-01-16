@@ -59,7 +59,7 @@ const getPendingRequests = async (req, res) => {
 // @route   PATCH /api/:institutionCode/admin/requests/:id
 // @access  Admin
 const updateRequestStatus = async (req, res) => {
-    const { status } = req.body; // APPROVED or REJECTED
+    const { status, role } = req.body; // APPROVED or REJECTED, optional role override
 
     try {
         const membership = await ClubMembership.findById(req.params.id)
@@ -76,15 +76,23 @@ const updateRequestStatus = async (req, res) => {
         }
 
         membership.status = status;
+
+        // Set the role when approving - use provided role or the requested role
+        if (status === 'APPROVED') {
+            membership.role = role || membership.requestedRole || 'MEMBER';
+        }
+
         await membership.save();
 
         // Send Email if Approved
         if (status === 'APPROVED') {
             try {
+                const roleText = membership.role === 'CLUB_LEAD' ? 'Club Lead' : 'Member';
                 const message = `
                     <h2>Membership Approved!</h2>
                     <p>Congratulations <strong>${membership.userId.name}</strong>,</p>
                     <p>Your membership request for <strong>${membership.clubId.name}</strong> at <strong>${membership.institutionId.name}</strong> has been approved.</p>
+                    <p>Your role: <strong>${roleText}</strong></p>
                     <p>You can now view club details and participate in events.</p>
 `;
 

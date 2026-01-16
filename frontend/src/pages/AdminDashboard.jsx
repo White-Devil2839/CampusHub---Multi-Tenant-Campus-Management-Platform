@@ -105,14 +105,25 @@ const AdminDashboard = () => {
                  <tr>
                     <th>User</th>
                     <th>Club</th>
+                    <th>Requested Role</th>
                     <th>Actions</th>
                  </tr>
                </thead>
                <tbody>
                 {requests.map((req) => (
                   <tr key={req._id}>
-                    <td>{req.userId.name}</td>
+                    <td>
+                      <div>
+                        <div className="font-medium">{req.userId.name}</div>
+                        <div className="text-sm text-gray-500">{req.userId.email}</div>
+                      </div>
+                    </td>
                     <td>{req.clubId.name}</td>
+                    <td>
+                      <span className={`badge ${req.requestedRole === 'CLUB_LEAD' ? 'badge-warning' : 'badge-info'}`}>
+                        {req.requestedRole === 'CLUB_LEAD' ? 'Club Lead' : 'Member'}
+                      </span>
+                    </td>
                     <td>
                       <div className="flex gap-2">
                         <Button variant="success" className="btn-sm" onClick={() => handleRequest(req._id, 'APPROVED')}>Approve</Button>

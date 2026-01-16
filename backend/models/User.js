@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
+        lowercase: true, // Automatically convert to lowercase
+        trim: true,
     },
     password: {
         type: String,
@@ -15,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['SUPER_ADMIN', 'ADMIN', 'MEMBER'],
+        enum: ['ADMIN', 'MEMBER'],
         default: 'MEMBER',
     },
     institutionId: {
@@ -24,7 +26,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     // Secure Password Reset Fields
-    resetTokenHash: String, // Bcrypt hash of the token
+    resetTokenHash: String,
     resetTokenExpiresAt: Date,
     resetUsed: {
         type: Boolean,
@@ -44,7 +46,5 @@ const userSchema = new mongoose.Schema({
 
 // Email must be unique globally across the entire platform
 userSchema.index({ email: 1 }, { unique: true });
-
-// OLD method removed. Logic moved to controller for async bcrypt.
 
 module.exports = mongoose.model('User', userSchema);

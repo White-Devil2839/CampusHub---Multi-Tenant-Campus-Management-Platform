@@ -37,8 +37,9 @@ const registerInstitution = async (req, res) => {
     }
 
     try {
-        // Check if admin email already exists
-        const existingUser = await User.findOne({ email: adminEmail });
+        // Check if admin email already exists (case-insensitive)
+        const normalizedEmail = adminEmail.toLowerCase().trim();
+        const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) {
             return res.status(400).json({ message: 'An account with this email already exists. Please use a different email or login.' });
         }
@@ -63,7 +64,7 @@ const registerInstitution = async (req, res) => {
 
         const user = await User.create({
             name: adminName,
-            email: adminEmail,
+            email: normalizedEmail,
             password: hashedPassword,
             role: 'ADMIN',
             institutionId: institution._id,
@@ -152,8 +153,9 @@ const globalLogin = async (req, res) => {
     }
 
     try {
-        // 1. Find a user by email (global search)
-        const user = await User.findOne({ email }).populate('institutionId');
+        // 1. Find a user by email (case-insensitive)
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail }).populate('institutionId');
 
         if (!user) {
             return res.status(401).json({ message: 'No account found with this email' });
@@ -184,7 +186,7 @@ const globalLogin = async (req, res) => {
 
         // 5. Build redirect paths
         let redirectPath;
-        if (user.role === 'ADMIN' || user.role === 'SUPER_ADMIN') {
+        if (user.role === 'ADMIN') {
             redirectPath = `/${institution.code}/admin`;
         } else {
             redirectPath = `/${institution.code}/dashboard`;
@@ -279,7 +281,9 @@ const registerUser = async (req, res) => {
     }
 
     try {
-        const userExists = await User.findOne({ email });
+        // Normalize email to lowercase for case-insensitive check
+        const normalizedEmail = email.toLowerCase().trim();
+        const userExists = await User.findOne({ email: normalizedEmail });
 
         if (userExists) {
             return res.status(400).json({ message: 'An account with this email already exists. Please login instead.' });
@@ -299,7 +303,7 @@ const registerUser = async (req, res) => {
 
         const user = await User.create({
             name,
-            email,
+            email: normalizedEmail,
             password: hashedPassword,
             role: 'MEMBER',
             institutionId: req.institutionId,
