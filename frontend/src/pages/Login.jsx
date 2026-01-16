@@ -17,13 +17,18 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError(''); // Clear error on input change
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    
     try {
         const { data } = await api.post(`/${institutionCode}/auth/login`, formData);
         
@@ -35,10 +40,12 @@ const Login = () => {
                  navigate(`/${institutionCode}/dashboard`);
             }
         } else {
-             setError('Login failed');
+             setError('Login failed. Please try again.');
         }
     } catch (err) {
-        setError(err.response?.data?.message || 'Login failed');
+        setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -46,10 +53,10 @@ const Login = () => {
     <div className="auth-container">
       <Card className="auth-card">
         <Link to="/" className="auth-link mb-4 block" style={{ textAlign: 'left', textDecoration: 'none' }}>
-            &larr; Back
+            &larr; Back to Home
         </Link>
         <h2 className="auth-title">Welcome Back</h2>
-        <p className="text-center text-gray-500 mb-6 font-medium">Login to {institutionCode}</p>
+        <p className="auth-subtitle">Login to {institutionCode}</p>
         
         {error && <div className="auth-error">{error}</div>}
         
@@ -60,9 +67,11 @@ const Login = () => {
               type="email"
               name="email"
               className="input"
+              placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -71,14 +80,16 @@ const Login = () => {
               type="password"
               name="password"
               className="input"
+              placeholder="Enter your password"
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
-          <Button type="submit" className="btn-full-width">Login</Button>
-          
-
+          <Button type="submit" className="btn-full-width" disabled={loading}>
+            {loading ? 'Signing in...' : 'Login'}
+          </Button>
         </form>
         
         <div className="auth-footer">

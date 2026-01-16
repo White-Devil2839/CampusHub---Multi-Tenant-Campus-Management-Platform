@@ -27,7 +27,7 @@ const GlobalRegister = () => {
                     <form onSubmit={handleStudentJoin} className="flex gap-2">
                         <input 
                             className="input" 
-                            placeholder="Institution Code (e.g. mit)"
+                            placeholder="Institution Code (e.g. 1234u6)"
                             value={institutionCode}
                             onChange={(e) => setInstitutionCode(e.target.value)}
                             required

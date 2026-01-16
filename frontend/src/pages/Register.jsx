@@ -18,13 +18,26 @@ const Register = () => {
     password: '',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Password validation
+  const passwordChecks = {
+    length: formData.password.length >= 8,
+    uppercase: /[A-Z]/.test(formData.password),
+    lowercase: /[a-z]/.test(formData.password),
+    number: /\d/.test(formData.password),
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError(''); // Clear error on input change
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    
     try {
         const { data } = await api.post(`/${institutionCode}/auth/register`, formData);
         
@@ -36,18 +49,24 @@ const Register = () => {
                  navigate(`/${institutionCode}/dashboard`);
             }
         } else {
-             setError('Registration failed');
+             setError('Registration failed. Please try again.');
         }
     } catch (err) {
-        setError(err.response?.data?.message || 'Registration failed');
+        const message = err.response?.data?.message || 'Registration failed. Please try again.';
+        setError(message);
+    } finally {
+        setLoading(false);
     }
   };
 
   return (
     <div className="auth-container">
       <Card className="auth-card">
+        <Link to={`/${institutionCode}/login`} className="auth-link mb-4 block" style={{ textAlign: 'left', textDecoration: 'none' }}>
+          &larr; Back to Login
+        </Link>
         <h2 className="auth-title">Create Account</h2>
-        <p className="text-center text-gray-500 mb-6 font-medium">Join {institutionCode}</p>
+        <p className="auth-subtitle">Join {institutionCode}</p>
         
         {error && <div className="auth-error">{error}</div>}
         
@@ -58,9 +77,11 @@ const Register = () => {
               type="text"
               name="name"
               className="input"
+              placeholder="Enter your full name"
               value={formData.name}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -69,9 +90,11 @@ const Register = () => {
               type="email"
               name="email"
               className="input"
+              placeholder="your.email@example.com"
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           <div className="form-group">
@@ -80,14 +103,27 @@ const Register = () => {
               type="password"
               name="password"
               className="input"
+              placeholder="Create a strong password"
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={loading}
             />
+            {formData.password && (
+              <div className="password-requirements">
+                <p>Password must have:</p>
+                <ul>
+                  <li className={passwordChecks.length ? 'valid' : ''}>At least 8 characters</li>
+                  <li className={passwordChecks.uppercase ? 'valid' : ''}>One uppercase letter</li>
+                  <li className={passwordChecks.lowercase ? 'valid' : ''}>One lowercase letter</li>
+                  <li className={passwordChecks.number ? 'valid' : ''}>One number</li>
+                </ul>
+              </div>
+            )}
           </div>
-          <Button type="submit" className="btn-full-width">Register</Button>
-
-
+          <Button type="submit" className="btn-full-width" disabled={loading}>
+            {loading ? 'Creating Account...' : 'Register'}
+          </Button>
         </form>
         
         <div className="auth-footer">

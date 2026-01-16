@@ -1,54 +1,45 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
 import AuthContext from '../context/AuthContext';
+import api from '../utils/api';
 import '../styles/auth.css';
-import api from '../utils/api'; // Ensure api utility is used
 
 const GlobalLogin = () => {
     const { loginSuccess } = React.useContext(AuthContext);
-    const [roleSelection, setRoleSelection] = useState(null); // 'student' or 'institution'
+    const [roleSelection, setRoleSelection] = useState(null);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
-// GoogleLogin logic removed
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
         
         try {
-            const response = await fetch('http://localhost:5008/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
+            const { data } = await api.post('/auth/login', { email, password });
             
-            const data = await response.json();
-            
-            if (response.ok) {
-                // Update Context
+            if (data.success) {
                 loginSuccess(data);
                 
-                // Strict Requirement: Read redirect from response and navigate
                 if (data.redirect) {
                     navigate(data.redirect);
                 } else {
-                    // Fallback
-                     if (data.role === 'ADMIN' || data.role === 'SUPER_ADMIN') {
-                         navigate(`/${data.institutionCode}/admin`);
+                    if (data.role === 'ADMIN' || data.role === 'SUPER_ADMIN') {
+                        navigate(`/${data.institutionCode}/admin`);
                     } else {
-                         navigate(`/${data.institutionCode}/dashboard`);
+                        navigate(`/${data.institutionCode}/dashboard`);
                     }
                 }
             } else {
-                setError(data.message || 'Login failed');
+                setError('Login failed. Please try again.');
             }
         } catch (err) {
-            setError('Network error. Please try again.');
+            setError(err.response?.data?.message || 'Network error. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -82,7 +73,7 @@ const GlobalLogin = () => {
                             Student / Member
                         </button>
                     </div>
-                     <div className="auth-footer">
+                    <div className="auth-footer">
                         <Link to="/" className="auth-link">
                             Back to Home
                         </Link>
@@ -95,9 +86,9 @@ const GlobalLogin = () => {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                 <button onClick={resetSelection} className="auth-link mb-4 block" style={{ textAlign: 'left' }}> 
+                <button onClick={resetSelection} className="auth-link mb-4 block" style={{ textAlign: 'left' }}> 
                     &larr; Back
-                 </button>
+                </button>
                 
                 <h2 className="auth-title">
                     {roleSelection === 'institution' ? 'Institution Login' : 'Student Login'}
@@ -108,6 +99,7 @@ const GlobalLogin = () => {
                         {error}
                     </div>
                 )}
+                
                 <form className="auth-form" onSubmit={handleLogin}>
                     <div className="form-group">
                         <label htmlFor="email" className="label">
@@ -120,8 +112,12 @@ const GlobalLogin = () => {
                             autoComplete="email"
                             required
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                if (error) setError('');
+                            }}
                             className="input"
+                            disabled={loading}
                         />
                     </div>
 
@@ -136,19 +132,24 @@ const GlobalLogin = () => {
                             autoComplete="current-password"
                             required
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                if (error) setError('');
+                            }}
                             className="input"
+                            disabled={loading}
                         />
                     </div>
 
                     <button
                         type="submit"
                         className="btn btn-primary btn-full-width"
+                        disabled={loading}
                     >
-                        Sign in
+                        {loading ? 'Signing in...' : 'Sign in'}
                     </button>
-
                 </form>
+                
                 <div className="auth-footer">
                     <Link to="/forgot-password" className="auth-link">
                         Forgot Password?

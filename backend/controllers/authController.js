@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const Institution = require('../models/Institution');
 const User = require('../models/User');
 const { generateToken, generateRefreshToken } = require('../utils/jwt');
@@ -12,7 +13,35 @@ const logAction = require('../utils/auditLogger'); // Audit Logger
 const registerInstitution = async (req, res) => {
     const { name, emailDomain, adminName, adminEmail, adminPassword } = req.body;
 
+    // Input validation with specific error messages
+    if (!name || !name.trim()) {
+        return res.status(400).json({ message: 'Institution name is required' });
+    }
+    if (!adminName || !adminName.trim()) {
+        return res.status(400).json({ message: 'Admin name is required' });
+    }
+    if (!adminEmail || !adminEmail.trim()) {
+        return res.status(400).json({ message: 'Admin email is required' });
+    }
+    if (!adminPassword) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+    if (adminPassword.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(adminEmail)) {
+        return res.status(400).json({ message: 'Please enter a valid email address' });
+    }
+
     try {
+        // Check if admin email already exists
+        const existingUser = await User.findOne({ email: adminEmail });
+        if (existingUser) {
+            return res.status(400).json({ message: 'An account with this email already exists. Please use a different email or login.' });
+        }
         // Auto-generate unique institution code
         let code;
         let isUnique = false;
@@ -89,7 +118,16 @@ const registerInstitution = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: error.message });
+        // Handle specific MongoDB errors
+        if (error.code === 11000) {
+            if (error.keyPattern?.email) {
+                return res.status(400).json({ message: 'An account with this email already exists' });
+            }
+            if (error.keyPattern?.code) {
+                return res.status(400).json({ message: 'Institution code conflict. Please try again.' });
+            }
+        }
+        res.status(500).json({ message: 'Registration failed. Please try again.' });
     }
 };
 
@@ -99,17 +137,31 @@ const registerInstitution = async (req, res) => {
 const globalLogin = async (req, res) => {
     const { email, password } = req.body;
 
+    // Input validation with specific error messages
+    if (!email || !email.trim()) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Please enter a valid email address' });
+    }
+
     try {
         // 1. Find a user by email (global search)
         const user = await User.findOne({ email }).populate('institutionId');
 
         if (!user) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'No account found with this email' });
         }
 
         // 2. Validate the password
         if (!(await bcrypt.compare(password, user.password))) {
-            return res.status(401).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Incorrect password' });
         }
 
         // 3. Fetch the institution using user.institutionId
@@ -194,26 +246,43 @@ const logout = (req, res) => {
 // @route   POST /api/auth/register (Note: Logic updated to use 'code')
 // @access  Public
 const registerUser = async (req, res) => {
-    // NOTE: This controller was previously coupled with institution middleware or params.
-    // For strict compliance, we should probably check if it's being hit with a known institution.
-    // Assuming this is called after finding institution by code or separate endpoint.
-    // For now, I will keep the logic compatible with the requested flow if needed,
-    // but the prompt focused on Login. I'll update it to be safe.
-
-    // IF this is hit via /:institutionCode/auth/register, req.institutionId is set by middleware.
-    // We need to ensure middleware looks for 'code' not 'institutionCode' if updated.
-
     const { name, email, password } = req.body;
 
+    // Input validation with specific error messages
+    if (!name || !name.trim()) {
+        return res.status(400).json({ message: 'Name is required' });
+    }
+    if (!email || !email.trim()) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
+    if (!password) {
+        return res.status(400).json({ message: 'Password is required' });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Please enter a valid email address' });
+    }
+
+    // Password strength validation
+    if (password.length < 8) {
+        return res.status(400).json({ message: 'Password must be at least 8 characters long' });
+    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+    if (!passwordRegex.test(password)) {
+        return res.status(400).json({ message: 'Password must include uppercase, lowercase, and a number' });
+    }
+
     if (!req.institutionId) {
-        return res.status(400).json({ message: "Institution context missing" });
+        return res.status(400).json({ message: 'Invalid institution code. Please check and try again.' });
     }
 
     try {
         const userExists = await User.findOne({ email });
 
         if (userExists) {
-            return res.status(400).json({ message: 'User with this email already exists' });
+            return res.status(400).json({ message: 'An account with this email already exists. Please login instead.' });
         }
 
         // Domain Check logic...

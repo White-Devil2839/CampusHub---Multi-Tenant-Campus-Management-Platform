@@ -81,9 +81,6 @@ app.use('/api/:institutionCode/me', userRoutes);
 
 const { errorHandler, notFound } = require('./middleware/errorMiddleware');
 
-// ... (routes)
-app.use('/api/:institutionCode/me', userRoutes);
-
 // 404 Handler
 app.use(notFound);
 

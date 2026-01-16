@@ -216,3 +216,99 @@ a {
 .w-full {
     width: 100%;
 }
+
+.block {
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Success/Error state utilities */
+.bg-green-50 {
+    background-color: #f0fdf4;
+}
+
+.bg-red-50 {
+    background-color: #fef2f2;
+}
+
+.border-green-200 {
+    border-color: #bbf7d0;
+}
+
+.border-red-200 {
+    border-color: #fecaca;
+}
+
+.text-green-700 {
+    color: #15803d;
+}
+
+.text-red-700 {
+    color: #b91c1c;
+}
+
+.text-red-600 {
+    color: #dc2626;
+}
+
+.text-gray-500 {
+    color: var(--text-secondary);
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.text-xl {
+    font-size: 1.25rem;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.rounded {
+    border-radius: var(--radius-md);
+}
+
+.border {
+    border-width: 1px;
+    border-style: solid;
+}
+
+.opacity-60 {
+    opacity: 0.6;
+}
+
+.flex-grow {
+    flex-grow: 1;
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 1024px) {
+    .lg\:grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.gap-8 {
+    gap: 2rem;
+}
