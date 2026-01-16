@@ -7,10 +7,11 @@ const User = require('../models/User');
 const Institution = require('../models/Institution');
 const Club = require('../models/Club');
 const ClubMembership = require('../models/ClubMembership');
-require('dotenv').config({ path: '../.env' });
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const MONGO_URI = 'mongodb://localhost:27017/multi-tenant-clubs29';
-const JWT_SECRET = process.env.JWT_SECRET || 'd83ae94ff259b24b45d55c22128493d02ccb87863243fb58ca971c719483e8d55af4542885672fa434c7423f4b8ff3cf88f2e900f83c0712e9b554223c4f2d0f';
+const MONGO_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET;
 const API_URL = `http://localhost:${process.env.PORT || 5008}/api`;
 
 const run = async () => {
