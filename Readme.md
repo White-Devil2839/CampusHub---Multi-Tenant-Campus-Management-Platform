@@ -15,18 +15,154 @@ CampusHub addresses the chaos of managing student life by replacing scattered Go
 - **For Club Leads**: Tools to manage rosters, schedule events without time conflicts, and engage members effectively.
 - **For Students**: A single place to discover communities, join clubs, register for events, and manage their campus involvement.
 
-## ⚡ Technical Highlights 
-It's a **Multi-Tenant SaaS Application**.
-*   **Architecture**: I implemented a **Multi-Tenant** architecture (similar to how Slack or Discord works). One codebase serves multiple universities, but each university's data is strictly isolated using Middleware Guards.
-*   **Security**: Bank-grade security practices including **Role-Based Access Control (RBAC)** (ensuring students can't access admin features) and secure **JWT Authentication**.
-*   **Design**: Built with a focus on **User Experience**. I moved away from boring dashboards and designed a modern "Glassmorphism" UI that feels premium and responsive.
-*   **Real-World Features**: Includes automated email notifications (via SendGrid) and conflict-detection algorithms for event planning.
+---
 
-## 🛠️ Tech Stack
-*   **Frontend**: React.js, Tailwind CSS (Custom Design System), React Router
-*   **Backend**: Node.js, Express.js (RESTful API)
-*   **Database**: MongoDB (Mongoose), tailored for flexible schema design
-*   **DevOps/Tools**: Git, SendGrid API
+## ✨ Key Features
+
+### 🔐 Authentication & Security
+- **Multi-Tenant Architecture**: Complete data isolation between institutions using middleware guards
+- **Secure Authentication**: JWT-based authentication with refresh tokens and secure cookie management
+- **Password Management**:
+  - **Forgot Password**: Secure password reset via email with time-limited tokens (15-minute expiry)
+  - **Reset Password**: Token-based password reset with validation
+  - **Change Password**: Users can update their passwords from profile settings
+  - Password strength validation (uppercase, lowercase, numbers, minimum 8 characters)
+- **Role-Based Access Control (RBAC)**: Three-tier permission system (ADMIN, CLUB_LEAD, MEMBER)
+- **Security Middleware**: 
+  - Rate limiting to prevent abuse
+  - Helmet.js for HTTP header security
+  - XSS protection and MongoDB injection prevention
+  - CORS configuration for secure cross-origin requests
+
+### 🏛️ Institution Management
+- **Institution Registration**: Easy signup process with auto-generated unique institution codes
+- **Email Domain Validation**: Optional email domain restrictions for institution-specific registrations
+- **Global & Tenant-Specific Routes**: Flexible routing system supporting both global and institution-scoped operations
+
+### 👥 User Management
+- **User Registration**: Institution-specific user registration with email validation
+- **User Profiles**: Complete profile management with account settings
+- **User Administration**: 
+  - View all users with search and filtering capabilities
+  - Update user roles dynamically
+  - Delete users with proper authorization checks
+  - Self-service account deletion
+- **Session Management**: Token versioning for session invalidation on password changes
+
+### 🎯 Club Management
+- **Club Creation**: Admins can create clubs with categories, descriptions, and logos
+- **Club Discovery**: Browse all approved clubs with filtering and search
+- **Club Membership**:
+  - Request-based membership system
+  - Role-based membership (Member or Club Lead)
+  - Admin approval workflow for membership requests
+  - Automatic approval for administrators
+  - View club members and their roles
+- **Club Details**: Comprehensive club pages showing members, events, and information
+
+### 📅 Event Management
+- **Event Creation**: Admins can create institution-wide or club-specific events
+- **Event Registration**: 
+  - Students can register for events
+  - Capacity management with real-time availability tracking
+  - **Conflict Detection**: 
+    - Prevents scheduling overlapping events for the same club
+    - Prevents users from registering for conflicting events
+    - Institution-wide time conflict detection
+- **Event Discovery**: Browse upcoming events with pagination
+- **Event Tracking**: View personal event registrations and history
+
+### 📧 Email Notifications
+- **Welcome Emails**: Sent to institution admins upon registration
+- **Password Reset Emails**: Secure reset links with expiration
+- **Password Change Confirmations**: Notifications when passwords are updated
+- **Membership Approval Notifications**: Email alerts when club memberships are approved
+- Integration with SendGrid API for reliable email delivery
+
+### 📊 Audit & Logging
+- **Comprehensive Audit Logs**: Track all administrative actions
+- **Action Tracking**: Logs include user actions, IP addresses, and user agents
+- **Admin Dashboard**: View recent audit logs for security and compliance
+
+### 🔄 Automated Tasks
+- **Cron Jobs**: Automated cleanup of past events (runs daily at midnight)
+- **Background Processing**: Non-blocking audit logging and email sending
+
+### 🎨 User Interface
+- **Modern Design**: Glassmorphism UI with premium, responsive design
+- **Responsive Layout**: Works seamlessly across desktop, tablet, and mobile devices
+- **Intuitive Navigation**: Role-based navigation and protected routes
+- **User Experience**: Focus on usability and accessibility
+
+---
+
+## 🛠️ Technical Stack
+
+### Frontend
+- **React.js** (v18.2.0) - Modern UI library for building interactive interfaces
+- **React Router** (v6.22.1) - Client-side routing with protected routes
+- **Axios** (v1.6.7) - HTTP client for API communication
+- **Vite** (v5.1.4) - Fast build tool and development server
+- **Custom CSS** - Tailwind-inspired design system with glassmorphism effects
+
+### Backend
+- **Node.js** - JavaScript runtime environment
+- **Express.js** (v4.22.1) - RESTful API framework
+- **MongoDB** with **Mongoose** (v8.20.1) - Flexible NoSQL database with ODM
+- **JWT** (jsonwebtoken v9.0.2) - Secure token-based authentication
+- **bcryptjs** (v3.0.3) - Password hashing and secure token storage
+
+### Security & Middleware
+- **Helmet.js** (v8.1.0) - HTTP security headers
+- **express-rate-limit** (v8.2.1) - Rate limiting to prevent abuse
+- **express-mongo-sanitize** (v2.2.0) - MongoDB injection prevention
+- **xss-clean** (v0.1.4) - XSS attack prevention
+- **hpp** (v0.2.3) - HTTP parameter pollution protection
+- **cookie-parser** (v1.4.7) - Secure cookie management
+
+### External Services
+- **SendGrid API** (@sendgrid/mail v8.1.6) - Email delivery service
+- **node-cron** (v4.2.1) - Scheduled task automation
+
+### Development Tools
+- **Nodemon** (v3.1.11) - Auto-restart development server
+- **Morgan** (v1.10.1) - HTTP request logger
+- **ESLint** - Code quality and consistency
+
+---
+
+## ⚡ Technical Highlights
+
+This project demonstrates advanced software engineering practices:
+
+1. **Multi-Tenant SaaS Architecture**: Implemented a sophisticated multi-tenant system similar to how Slack or Discord works, where one codebase serves multiple universities with complete data isolation using middleware guards and institution-scoped queries.
+
+2. **Enterprise-Grade Security**: 
+   - Bank-grade security practices including Role-Based Access Control (RBAC)
+   - Secure JWT authentication with refresh tokens
+   - Password reset with cryptographically secure tokens (48-byte hex)
+   - Rate limiting, XSS protection, and MongoDB injection prevention
+   - Session invalidation on password changes
+
+3. **Scalable Design Patterns**:
+   - RESTful API architecture
+   - Middleware-based request processing
+   - Database indexing for performance
+   - Pagination for large datasets
+
+4. **Real-World Problem Solving**:
+   - Conflict detection algorithms for event scheduling
+   - Automated email notifications via SendGrid
+   - Background job processing with cron
+   - Comprehensive audit logging for compliance
+
+5. **Modern Development Practices**:
+   - Clean code architecture with separation of concerns
+   - Error handling middleware
+   - Input validation and sanitization
+   - Responsive, modern UI design
+
+---
 
 ## 💻 How to Run This Project
 
@@ -216,3 +352,4 @@ This project is proprietary and created for demonstration purposes.
 ---
 
 *For questions or inquiries, please contact the developer.*
+
