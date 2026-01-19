@@ -29,7 +29,7 @@ const cookieParser = require('cookie-parser');
 // Middleware
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://divyash-choudhary-portfolio.vercel.app',
+    'https://campus-hub-multi-tenant-campus-mana.vercel.app',
     process.env.FRONTEND_URL
 ].filter(Boolean); // Remove undefined/null values
 
