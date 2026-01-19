@@ -30,13 +30,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginSuccess = (data) => {
-      // data: { token, role, institutionCode, ... }
+      // data: { token, role, institutionCode, name, ... }
       localStorage.setItem('token', data.token);
       
       const userInfo = {
           role: data.role,
-          institutionCode: data.institutionCode
-          // Add name if available
+          institutionCode: data.institutionCode,
+          name: data.name // Store name for display in dashboard
       };
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       
